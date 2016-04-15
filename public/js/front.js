@@ -1,3 +1,4 @@
+// public/js/front.js
 
 jQuery(function($){
 	var socket = io.connect();
@@ -29,7 +30,7 @@ jQuery(function($){
 	});
 
 	//chat controls====================================
-	socket.on('usernames', function(data){ //refresh users list
+	socket.on('usernames', function(data){ //recieve & refresh users list
 		var html = '';
 		var len = data.length;
 		for(i=0;i<len;i++){
@@ -47,8 +48,12 @@ jQuery(function($){
 	socket.on('new message', function(data){
 		$chat.append('<b>'+ data.nick + ': </b>' + data.msg + "</br>");
 	});
-	//game controls=====================================
 
+	//game controls=====================================
+	$join.submit(function(e){
+		e.preventDefault();
+		socket.emit('join request'); //it has the nickname data
+	});
 
 
 });

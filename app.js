@@ -1,30 +1,34 @@
+//app.js
+
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var nicknames = [];
+var game = '';
 
-function Game(player1,player2){
-	this.player1 = player1;
-	this.player2 = player2;
+function Game(){ //game object
+	this.player1 = '';
+	this.player2 = '';
 	this.p1score = 0;
 	this.p2score = 0;
 	this.movies = [['Casablanca',1942],['Whiplash',2014],['Memento',2000]]; //test data before live calls
 }
 
-function createGame(data,data){
-	var game = new Game(data,data);
-
+function createGame(){ //create blank game
+	game = new Game();
 }
 
-function addPlayer(socket.nickname){
-	game.player2 = socket.nickname
+function addPlayer1(player){
+	game.player1 = player //passed from socket.nickname
+}
+function addPlayer2(player){
+	game.player2 = player //passed from socket.nickname
 }
 
 
 server.listen(3000);
-
-	app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs...
+app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs...
 
 //turn on connection event, what happens when user sends something. kind of like document.ready
 io.sockets.on('connection', function(socket){ //function with user's socket
@@ -51,5 +55,22 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		if(!socket.nickname) return; //if leaving before setting nickname
 		nicknames.splice(nicknames.indexOf(socket.nickname), 1); //splice user from array
 		updateNicks();
+	});
+
+	//game controls ==========================
+	socket.on('join request', function(){
+		if(typeof game !== 'undefined' && game.player1.length > 0 && game.player2.length > 0){
+			io.sockets.emit('new message', {msg: socket.nickname+', the game is full dude.', nick: 'robot'});
+			console.log("game full");
+		}else if(typeof game === 'undefined' || game.player1){
+			createGame();
+			addPlayer1(socket.nickname);
+			io.sockets.emit('new message', {msg: socket.nickname+' created a new game!', nick: 'robot'});
+			console.log("create game, add player1");
+		}else if(game.player1.length > 0 && game.player2.length === 0){
+			addPlayer2(socket.nickname);
+			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
+			console.log("add player2");
+		}
 	});
 });
