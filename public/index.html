@@ -1,31 +1,67 @@
 <html>
 <head>
-	<title>Thar be Dragons here!</title>
+	<title>Movie Arcade</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css"></link>
 </head>
 <body>
-	<div id="nickWrap">
-		<p>Enter a username:</p>
-		<p id="nickError"></p>
-		<form id="setNick">
-		<input size="40" id="nickname"></input>
-		<input type="submit"></input>
-		</form>
+	<div id="nickWrap" class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="center-block nickbox">
+					<form id="setNick" class="form-inline" autocomplete="off">
+						<div class="form-group">
+							<!-- <label for="nickname">Name:</label> -->
+							<input id="nickname" class="form-control input-lg" placeholder="Nickname"></input>
+							<input type="submit" value="Go!" class="btn btn-primary btn-lg"></input>
+						</div>
+					</form>
+					<p id="nickError" class="bg-danger"></p>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div id="contentWrap">
-		<div id="chatWrap">
-			<div id="chat"></div>
-			<form id="send-message">
-				<input size="40" id="message"></input>
-				<input type="submit"></input>
-			</form>
+	<!-- errthing in contentWrap is hidden until user has a nickname. -->
+	<div id="contentWrap" class="container"> 
+		<div class="row">
+			<div class="col-md-4">
+				<div id="chatWrap" class="well">
+					<div id="chat"></div>
+					<form id="send-message" autocomplete="off">
+						<div class="form-group">
+							<input id="message" class="form-control" placeholder="u wot m8?"></input>
+							<input type="submit" value="send" class="btn btn-primary btn-block"></input>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="well">
+					<div id="users"></div>
+				</div>
+			</div>
+
+			<!-- This'll be the game board - arcade style where winner stays -->
+			<div class="col-md-5">
+				<div id="gameWrap"> 
+					<div id="totalsWrap"></div>
+					<div id="playWrap">
+						<div id="movieStuff"></div>
+						<div id="answerWrap">
+							<form id="send-answer" class="form-inline" autocomplete="off">
+								<input id="answer"></input>
+								<input type="submit"></input>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-		<div id="users"></div>
 	</div>
 
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
   <script src="js/front.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 </body>
 </html>
