@@ -6,9 +6,8 @@ var nicknames = [];
 
 server.listen(3000);
 
-app.get('/', function(req, res){ //send the home page
-	res.sendFile(__dirname +'/index.html');
-});
+	app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs...
+
 //turn on connection event, what happens when user sends something. kind of like document.ready
 io.sockets.on('connection', function(socket){ //function with user's socket
 	socket.on('new user', function(data, callback){

@@ -1,0 +1,31 @@
+<html>
+<head>
+	<title>Thar be Dragons here!</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css"></link>
+</head>
+<body>
+	<div id="nickWrap">
+		<p>Enter a username:</p>
+		<p id="nickError"></p>
+		<form id="setNick">
+		<input size="40" id="nickname"></input>
+		<input type="submit"></input>
+		</form>
+	</div>
+
+	<div id="contentWrap">
+		<div id="chatWrap">
+			<div id="chat"></div>
+			<form id="send-message">
+				<input size="40" id="message"></input>
+				<input type="submit"></input>
+			</form>
+		</div>
+		<div id="users"></div>
+	</div>
+
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+  <script src="js/front.js"></script>
+</body>
+</html>
