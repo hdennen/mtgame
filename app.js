@@ -3,7 +3,24 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var nicknames = [];
-var gameBoard = 
+
+function Game(player1,player2){
+	this.player1 = player1;
+	this.player2 = player2;
+	this.p1score = 0;
+	this.p2score = 0;
+	this.movies = [['Casablanca',1942],['Whiplash',2014],['Memento',2000]]; //test data before live calls
+}
+
+function createGame(data,data){
+	var game = new Game(data,data);
+
+}
+
+function addPlayer(socket.nickname){
+	game.player2 = socket.nickname
+}
+
 
 server.listen(3000);
 

@@ -8,6 +8,12 @@ jQuery(function($){
 	var $messageForm = $('#send-message');
 	var $messageBox = $('#message');
 	var $chat = $('#chat');
+	//game vars
+	var $join = $('#join-request');
+	var $sendAnswer = $('#send-answer');
+	var $answer = $('#answer');
+
+
 
 	$nickForm.submit(function(e){
 		e.preventDefault();
@@ -22,7 +28,8 @@ jQuery(function($){
 		$nickBox.val('');
 	});
 
-	socket.on('usernames', function(data){
+	//chat controls====================================
+	socket.on('usernames', function(data){ //refresh users list
 		var html = '';
 		var len = data.length;
 		for(i=0;i<len;i++){
@@ -40,4 +47,8 @@ jQuery(function($){
 	socket.on('new message', function(data){
 		$chat.append('<b>'+ data.nick + ': </b>' + data.msg + "</br>");
 	});
+	//game controls=====================================
+
+
+
 });
