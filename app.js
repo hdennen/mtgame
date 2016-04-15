@@ -5,7 +5,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var nicknames = [];
-var game = '';
+var game = new Game();
 
 function Game(){ //game object
 	this.player1 = '';
@@ -51,26 +51,29 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		io.sockets.emit('new message', {msg: data, nick: socket.nickname});
 	});
 
+
+
+	//game controls ==========================
+	socket.on('join request', function(){ //add players to game
+		if(game.player1 != '' && game.player2 != ''){
+			io.sockets.emit('new message', {msg: socket.nickname+', the game is full dude.', nick: 'robot'});
+			console.log("game full");
+		}else if(game.player1 === ''){
+			addPlayer1(socket.nickname);
+			io.sockets.emit('new message', {msg: socket.nickname+' created a new game!', nick: 'robot'});
+			console.log(game);
+		}else if(game.player1 != '' && game.player2 === ''){
+			addPlayer2(socket.nickname);
+			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
+			console.log(game);
+		}
+	});
+
+
+	//on disconnect=======================================
 	socket.on('disconnect', function(data){
 		if(!socket.nickname) return; //if leaving before setting nickname
 		nicknames.splice(nicknames.indexOf(socket.nickname), 1); //splice user from array
 		updateNicks();
-	});
-
-	//game controls ==========================
-	socket.on('join request', function(){
-		if(typeof game !== 'undefined' && game.player1.length > 0 && game.player2.length > 0){
-			io.sockets.emit('new message', {msg: socket.nickname+', the game is full dude.', nick: 'robot'});
-			console.log("game full");
-		}else if(typeof game === 'undefined' || game.player1){
-			createGame();
-			addPlayer1(socket.nickname);
-			io.sockets.emit('new message', {msg: socket.nickname+' created a new game!', nick: 'robot'});
-			console.log("create game, add player1");
-		}else if(game.player1.length > 0 && game.player2.length === 0){
-			addPlayer2(socket.nickname);
-			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
-			console.log("add player2");
-		}
 	});
 });
