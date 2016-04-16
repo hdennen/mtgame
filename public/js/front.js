@@ -73,7 +73,8 @@ jQuery(function($){
 	});
 	$sendAnswer.submit(function(e){ //answer
 		e.preventDefault();
-		socket.emit('send answer'); //it has the nickname data
+		socket.emit('send answer', $answer.val());
+		$answer.val('');
 	});
 
 	socket.on('alert', function(data){
@@ -83,6 +84,11 @@ jQuery(function($){
  	socket.on('show board', function(){
 		$playWrap.show();
 	});
+	 socket.on('hide board', function(){
+		$playWrap.hide();
+	});
+
+	 
 	socket.on('game message', function(data){
 		$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
 	});
@@ -91,7 +97,7 @@ jQuery(function($){
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-		$movie.html(data.movies[0][0]);
+		$movie.html(data.movies[data.round][0]);
 	});	
 
 });
