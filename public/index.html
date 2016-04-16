@@ -43,19 +43,24 @@
 
 			<!-- This'll be the game board - arcade style where winner stays -->
 			<div class="col-md-5">
-				<div id="gameAreaWrap"> 
+				<div id="alerts"></div>
+				<div id="gameAreaWrap">
 					<div id="joinWrap">
 						<form id="join-request" class="form-inline">
 							<input type="submit" value="Join!" class="btn btn-success"></input>
 						</form>
 					</div>
 
-					<div id="totalsWrap">
-						<div id="p1score"></div>
-						<div id="p2score"></div>
-					</div>
 					<div id="spectateWrap"></div>
+
 					<div id="playWrap">
+						<div id="gameNotes" class=""></div>
+						<div id="totalsWrap">
+							<div id="p1nick"></div>
+							<div id="p1score"></div>
+							<div id="p2score"></div>
+							<div id="p2nick"></div>
+						</div>
 						<div id="movieStuff"></div>
 						<div id="answerWrap">
 							<form id="send-answer" class="form-inline" autocomplete="off">
