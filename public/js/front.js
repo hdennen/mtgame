@@ -16,8 +16,10 @@ jQuery(function($){
 	var $playWrap = $('#playWrap');
 	var $gameNotes = $('#gameNotes');
 	var $movie = $('#movieStuff');
+	var $submission = $('#submission');
 	var $sendAnswer = $('#send-answer');
 	var $answer = $('#answer');
+	var $wait = $('#waiting');
 
 	var	$p1 = $('#p1nick');
 	var	$p2 = $('#p2nick');
@@ -42,6 +44,12 @@ function slideFade(elem) {
 	}, 'slow', function() {
 	    $(this).hide();
 	});
+}
+
+function keepFading($obj) {
+    $obj.fadeToggle(800, function () {
+        keepFading($obj)
+    });
 }
 
  //nicknames controls==============================
@@ -115,6 +123,15 @@ function slideFade(elem) {
 		$playWrap.hide();
 		$joinWrap.show();
 	});
+	socket.on('start', function(){
+		$wait.stop().hide();
+		$submission.prop('disabled', false);
+	})
+	socket.on('wait', function(){
+		$wait.show();
+		keepFading($($wait));
+		$submission.prop('disabled', true);
+	})
 
   //game play updates =======================================
 	socket.on('game message', function(data){

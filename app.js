@@ -45,6 +45,7 @@ function addPlayer1(socket){ //socket id and nickname
 	game.p1socket = socket.id; //store player's socket in game
 	socket.join(gameBoard);
 	socket.emit('show board');
+	socket.emit('wait');
 	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
 }
 function addPlayer2(socket){
@@ -75,6 +76,7 @@ function startGame(){ //run the game
 	io.sockets.emit('new message', {msg: game.player1 + " and " + game.player2 + " started a game.", nick: 'robot'});
 	io.sockets.in(gameBoard).emit('game data', game);
 	io.sockets.in(gameBoard).emit('game message', {msg:"The game is afoot!", alert: 'alert-success'});
+	io.sockets.in(gameBoard).emit('start');
 	console.log(game); //test+++++++++++++++++++++++++++
 }
 
