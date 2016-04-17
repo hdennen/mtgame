@@ -3,7 +3,7 @@
 }
 #nickWrap .nickbox{
 	margin-top: 44vh;
-	width: 320px;
+	max-width: 320px;
 }
 
 #chat{
@@ -34,6 +34,14 @@
     font-size: 32px;
     margin: 40px 0px;
 }
+#gameNotes{
+	height: 100px;
+}
+#waiting{
+	width:90%;
+	margin:10px 2%;
+	font-size: 18px;
+}
 
 h1{
 	text-align: center;
@@ -42,4 +50,11 @@ h1{
 .blips{
 	margin-top: -34px;
 	display: none;
+}
+
+@media only screen and (max-device-width : 480px) {
+	#setNick input[type=submit]{
+    margin: 20px auto;
+    display: block;
+	}
 }
