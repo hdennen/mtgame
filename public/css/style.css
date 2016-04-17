@@ -16,6 +16,30 @@
 #chatWrap{
 
 }
+#joinWrap{
+	margin:20px 0px;
+}
 #playWrap{
+	display: none;
+}
+#totalsWrap .nick{
+	font-size: 16px;
+}
+#totalsWrap .nick.left{
+}
+#totalsWrap .score{
+	font-size: 24px;
+}
+#movieStuff{
+    font-size: 32px;
+    margin: 40px 0px;
+}
+
+h1{
+	text-align: center;
+	font-size: 60px;
+}
+.blips{
+	margin-top: -34px;
 	display: none;
 }

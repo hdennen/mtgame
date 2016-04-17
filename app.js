@@ -151,18 +151,22 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			game.round++;
 			if(socket.nickname === game.player1){
 				game.p1score += 5;
-				socket.emit('game message', {msg:"+5", alert:"alert-success"});
+				io.sockets.in(gameBoard).emit('points', {msg:"+5", type:"up", player:"p1"});
+				socket.emit('game message', {msg:"Nice!", alert:"alert-success"});
 			}else if(socket.nickname === game.player2){
 				game.p2score += 5;
-				socket.emit('game message', {msg:"+5", alert:"alert-success"});
+				io.sockets.in(gameBoard).emit('points', {msg:"+5", type:"up", player:"p2"});
+				socket.emit('game message', {msg:"Nice!", alert:"alert-success"});
 			}
 		}else {
 			if(socket.nickname === game.player1){
 				game.p1score -= 3;
-				socket.emit('game message', {msg:"-3", alert:"alert-danger"});
+				io.sockets.in(gameBoard).emit('points', {msg:"-3", type:"down", player:"p1"});
+				socket.emit('game message', {msg:"Oh no!", alert:"alert-danger"});
 			}else if(socket.nickname === game.player2){
 				game.p2score -= 3;
-				socket.emit('game message', {msg:"-3", alert:"alert-danger"});
+				io.sockets.in(gameBoard).emit('points', {msg:"-3", type:"down", player:"p2"});
+				socket.emit('game message', {msg:"Oh no!", alert:"alert-danger"});
 			}
 		}
 		io.sockets.in(gameBoard).emit('game data', game);

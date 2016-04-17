@@ -23,6 +23,7 @@
 
 	<!-- errthing in contentWrap is hidden until user has a nickname. -->
 	<div id="contentWrap" class="container"> 
+		<h1>H's Arcade: Movie Trivia</h1>
 		<div class="row">
 			<div class="col-md-4">
 				<div id="chatWrap" class="well">
@@ -45,28 +46,63 @@
 			<div class="col-md-5">
 				<div id="alerts"></div>
 				<div id="gameAreaWrap">
-					<div id="joinWrap">
+					<div id="joinWrap" class="text-center">
 						<form id="join-request" class="form-inline">
-							<input type="submit" value="Join!" class="btn btn-success"></input>
+							<input type="submit" value="Join Game" class="btn btn-lg btn-success"></input>
 						</form>
 					</div>
 
 					<div id="spectateWrap"></div>
 
 					<div id="playWrap">
-						<div id="gameNotes" class=""></div>
-						<div id="totalsWrap">
-							<div id="p1nick"></div>
-							<div id="p1score"></div>
-							<div id="p2score"></div>
-							<div id="p2nick"></div>
+
+						<div id="totalsWrap" class="row">
+							<div class="row">
+								<div class="col-sm-5 nick text-center">
+									<div id="p1nick"></div>
+								</div>
+								<div class="col-sm-2 text-center">
+									<div id="vs">vs</div>
+								</div>
+								<div class="col-sm-5 nick text-center">
+									<div id="p2nick"></div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-5 score text-center">
+									<div id="p1score"></div>
+									<div id="p1up" class="blips">+5</div>
+									<div id="p1down" class="blips">-3</div>
+								</div>
+								<div class="col-sm-2  text-center">
+									<div id="dash">-</div>
+								</div>
+								<div class="col-sm-5 score text-center">
+									<div id="p2score"></div>
+									<div id="p2up" class="blips">+5</div>
+									<div id="p2down" class="blips">-3</div>
+								</div>
+							</div>
+
+
+
+
 						</div>
-						<div id="movieStuff"></div>
-						<div id="answerWrap">
-							<form id="send-answer" class="form-inline" autocomplete="off">
-								<input id="answer" class="form-control" placeholder="year" maxlength="4"></input>
-								<input type="submit" value="Answer!" class="btn btn-success"></input>
-							</form>
+
+						<div class="row">
+							<div id="movieStuff" class="col-sm-12 text-center"></div>
+						</div>
+						<div class="row">
+							<div id="answerWrap" class="col-sm-12 text-center">
+								<form id="send-answer" class="form-inline" autocomplete="off">
+									<input id="answer" class="form-control" placeholder="year" maxlength="4"></input>
+									<input type="submit" value="Answer!" class="btn btn-success"></input>
+								</form>
+							</div>
+							
+						</div>
+						<div class="row">
+							<div id="gameNotes" class="col-sm-12 text-center"></div> <!-- notifications -->
 						</div>
 					</div>
 				</div>

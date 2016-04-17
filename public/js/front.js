@@ -12,6 +12,7 @@ jQuery(function($){
 	//game vars
 	var $alerts = $('#alerts');
 	var $join = $('#join-request');
+	var $joinWrap = $('#joinWrap');
 	var $playWrap = $('#playWrap');
 	var $gameNotes = $('#gameNotes');
 	var $movie = $('#movieStuff');
@@ -23,6 +24,25 @@ jQuery(function($){
 	var	$p1s = $('#p1score');
 	var	$p2s = $('#p2score');
 
+function slideFade(elem) {
+	$(elem).removeAttr( 'style' );
+	if(elem === "#p1up" || elem === "#p2up"){
+		$(elem).addClass('text-success');
+	}else{
+		$(elem).addClass('text-danger');
+	}
+	$(elem).show();
+	$(elem).animate({
+	    opacity: 0,
+	    //height: 0,
+	    marginTop: -100,
+	    //marginBottom: 0,
+	    //paddingTop: 0,
+	    //paddingBottom: 0
+	}, 'slow', function() {
+	    $(this).hide();
+	});
+}
 
  //nicknames controls==============================
 	$nickForm.submit(function(e){
@@ -89,15 +109,18 @@ jQuery(function($){
 
  	socket.on('show board', function(){
 		$playWrap.show();
+		$joinWrap.hide();
 	});
 	 socket.on('hide board', function(){
 		$playWrap.hide();
+		$joinWrap.show();
 	});
 
-
+  //game play updates =======================================
 	socket.on('game message', function(data){
 		$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
 	});
+
 	socket.on('game data', function(data){ //gets whole object at first.
 		$p1.html(data.player1);
 		$p2.html(data.player2);
@@ -105,5 +128,22 @@ jQuery(function($){
 		$p2s.html(data.p2score);
 		$movie.html('').html(data.movies[data.round][0]);
 	});	
+
+	socket.on('points', function(data){
+		if(data.player === "p1"){
+			if(data.type === "up"){
+				slideFade($('#p1up'));
+			}else{
+				slideFade($('#p1down'));
+			}
+			
+		}else if(data.player === "p2"){
+			if(data.type === "up"){
+				slideFade($('#p2up'));
+			}else{
+				slideFade($('#p2down'));
+			}
+		}
+	});
 
 });
