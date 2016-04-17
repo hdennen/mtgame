@@ -32,14 +32,14 @@ jQuery(function($){
 				$('#nickWrap').hide();
 				$('#contentWrap').show();
 			} else {
-				$nickError.html("Somebody's already using that one :( try again.");
+				$nickError.html("Somebody's already using that one :( try again.").addClass('alert alert-danger').show().delay(1000).fadeOut("slow");
 			}
 		});
 		$nickBox.val('');
 	});
 
 	//chat controls====================================
-	socket.on('usernames', function(data){ //recieve & refresh users list
+	socket.on('usernames', function(data){ //receive & refresh users list
 		var html = '';
 		var len = data.length;
 		for(i=0;i<len;i++){
@@ -63,6 +63,12 @@ jQuery(function($){
 		
 	});
 	//to do: do some check scroll magic on new message.
+
+	//leave arcade
+	socket.on('leave arcade', function(){
+		$('#contentWrap').hide();
+		$('#nickWrap').show();
+	});
 
 
 
@@ -88,11 +94,11 @@ jQuery(function($){
 		$playWrap.hide();
 	});
 
-	 
+
 	socket.on('game message', function(data){
 		$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
 	});
-	socket.on('game data', function(data){ //gets whole object at first. to do: later manipulate object on client side before sending back for top scores.
+	socket.on('game data', function(data){ //gets whole object at first.
 		$p1.html(data.player1);
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);

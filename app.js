@@ -5,8 +5,8 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var request = require('request');
-var nicknames = []; //to do: set a limit on this somewhere.
-var game = new Game(); //to do: dynamically instantiate this
+var nicknames = []; //to do: set a limit on this.
+var game = new Game(); //maybe do: dynamically instantiate this for multiple simultanious games later
 var gameRunning = false;
 var gameBoard = 'gameBoard'; //use socket.io's rooms functionality
 
@@ -23,6 +23,8 @@ function Game(){ //game object
 	this.player2 = '';
 	this.p1score = 0;
 	this.p2score = 0;
+	this.p1socket = '';
+	this.p2socket = '';
 	this.keys = [];
 	this.round = 0;
 	this.movies = [];
@@ -38,6 +40,20 @@ function getMovies(){ //do once to reduce api calls
 	});
 }
 
+function addPlayer1(socket){ //socket id and nickname
+	game.player1 = socket.nickname; //passed from socket.nickname
+	game.p1socket = socket.id; //store player's socket in game
+	socket.join(gameBoard);
+	socket.emit('show board');
+	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
+}
+function addPlayer2(socket){
+	game.player2 = socket.nickname; //passed from socket.nickname
+	game.p2socket = socket.id; //store player's socket in game
+	socket.join(gameBoard);
+	socket.emit('show board');
+	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
+}
 
 function genKeys(){ //8 random keys for movies
 	for(var i=0;i<8;i++){
@@ -54,31 +70,30 @@ function popMovies(){ //populate movies based on keys
 function startGame(){ //run the game
 	//by this point the game has players and the gameBoard room is populated with the players.
 	gameRunning = true;
-	genKeys();
+	genKeys(); 
 	popMovies();
 	io.sockets.emit('new message', {msg: game.player1 + " and " + game.player2 + " started a game.", nick: 'robot'});
 	io.sockets.in(gameBoard).emit('game data', game);
 	io.sockets.in(gameBoard).emit('game message', {msg:"The game is afoot!", alert: 'alert-success'});
+	console.log(game); //test+++++++++++++++++++++++++++
 }
 
-function addPlayer1(socket, player){
-	game.player1 = player //passed from socket.nickname
-	socket.join(gameBoard);
-	socket.emit('show board');
-	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
-}
-function addPlayer2(socket, player){
-	game.player2 = player //passed from socket.nickname
-	socket.join(gameBoard);
-	socket.emit('show board');
-	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
+function resetGame(socket){ //resets and puts winner as player 1
+	gameRunning = false;
+	game = new Game();
+	addPlayer1(socket);
 }
 
-
+function getSocket(socketID){
+	return io.sockets.sockets[socketID];;
+}
 
 
 //turn on connection event, what happens when user sends something. similar to document.ready
 io.sockets.on('connection', function(socket){ //function with user's socket
+
+	//chat controls==========================================
+
 	socket.on('new user', function(data, callback){
 		if(nicknames.indexOf(data)!= -1){ //check if exists
 			callback(false);
@@ -105,18 +120,17 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 	//join game-------------------
 	socket.on('join request', function(){ //add players to game
 		if(game.player1 === socket.nickname || game.player2 === socket.nickname){ //check player's not already in game
-			//io.sockets.emit('new message', {msg: socket.nickname+", you're already in the game!", nick: 'robot'});
 			socket.emit('alert', {msg:"You're already in the game dummy!", alert: 'alert-danger'});
 		}else if(game.player1 != '' && game.player2 != ''){ //check game's not full
-			io.sockets.emit('new message', {msg: socket.nickname+', the game is full dude.', nick: 'robot'});
+			socket.emit('alert', {msg:"whoa there, this game is full.", alert: 'alert-danger'});
 		}else if(game.player1 === ''){ //add as player 1
-			addPlayer1(socket, socket.nickname);
+			addPlayer1(socket);
 			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
-			console.log(game);
+			console.log(game); //test+++++++++++++++++++++++++++
 		}else if(game.player1 != '' && game.player2 === ''){ //add as player 2
-			addPlayer2(socket, socket.nickname);
+			addPlayer2(socket);
 			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
-			console.log(game);
+			console.log(game); //test+++++++++++++++++++++++++++
 		}
 		if(gameRunning === false && game.player1 != '' && game.player2 != ''){
 			startGame();
@@ -133,49 +147,75 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			game.round++;
 			if(socket.nickname === game.player1){
 				game.p1score += 5;
+				socket.emit('game message', {msg:"+5", alert:"alert-success"});
 			}else if(socket.nickname === game.player2){
 				game.p2score += 5;
+				socket.emit('game message', {msg:"+5", alert:"alert-success"});
 			}
 		}else {
 			if(socket.nickname === game.player1){
 				game.p1score -= 3;
+				socket.emit('game message', {msg:"-3", alert:"alert-danger"});
 			}else if(socket.nickname === game.player2){
 				game.p2score -= 3;
+				socket.emit('game message', {msg:"-3", alert:"alert-danger"});
 			}
 		}
 		io.sockets.in(gameBoard).emit('game data', game);
+
 		//game end------------------------------------------
-		if(game.round === 8){
+		if(game.round === 3){
 			io.sockets.in(gameBoard).emit('game message', {msg:"Game Over", alert: 'alert-success'});
-			if(game.p1score > game.p2score){
+			if(game.p1score > game.p2score){ //player 1 wins
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
-			}else if(game.p1score < game.p2score){
+				io.to(game.p2socket).emit('hide board');
+				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
+				//reset game
+				resetGame(getSocket(game.p1socket));
+			}else if(game.p1score < game.p2score){ //player 2 wins
 				var diff = game.p2score - game.p1score;
 				io.sockets.emit('new message', {msg: game.player2+' won the last game by ' + diff +' points!', nick: 'robot'});
+				io.to(game.p1socket).emit('hide board');
+				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
+				//reset game
+				resetGame(getSocket(game.p2socket));
+			}else { //to do: tie logic
+				io.sockets.in(gameBoard).emit('alert', {msg: "y'all tied!, rematch?", alert: "alert-info"});
 			}
-			gameRunning = false;
-			socket.emit('hide board');
-			socket.emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
+			
+
 		}
 	});
 
 
-	//on disconnect=======================================
+	//on disconnect=============================================================
+
 	socket.on('disconnect', function(data){
 		if(!socket.nickname) return; //if leaving before setting nickname
 		nicknames.splice(nicknames.indexOf(socket.nickname), 1); //splice user from array
 		updateNicks();
+		socket.emit('leave arcade');
 		if(socket.nickname === game.player1){
-			game.player1 = '';
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
-			console.log(game);
+			//reset game
+			if(game.p2socket){
+				resetGame(getSocket(game.p2socket));
+			}else{
+				game = new Game();
+			}
+
+			console.log(game); //test+++++++++++++++++++++++++++
+
 		}else if(socket.nickname === game.player2){
-			game.player2 = '';
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
-			console.log(game);
+			//reset game
+			resetGame(getSocket(game.p1socket));
+
+			console.log(game); //test+++++++++++++++++++++++++++
+
 		}
 	});
 });
