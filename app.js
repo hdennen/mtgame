@@ -79,12 +79,16 @@ function startGame(){ //run the game
 }
 
 function resetGame(socket){ //resets and puts winner as player 1
+	console.log("resetting game."); //test+++++++++++++++++++++++++++
 	gameRunning = false;
 	game = new Game();
 	addPlayer1(socket);
+	io.sockets.in(gameBoard).emit('game data', game);
+	console.log(game); //test+++++++++++++++++++++++++++
 }
 
 function getSocket(socketID){
+	console.log("getting socket of " + socketID); //test+++++++++++++++++++++++++++
 	return io.sockets.sockets[socketID];;
 }
 
@@ -123,11 +127,11 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			socket.emit('alert', {msg:"You're already in the game dummy!", alert: 'alert-danger'});
 		}else if(game.player1 != '' && game.player2 != ''){ //check game's not full
 			socket.emit('alert', {msg:"whoa there, this game is full.", alert: 'alert-danger'});
-		}else if(game.player1 === ''){ //add as player 1
+		}else if(game.player1 === '' && socket.nickname != undefined){ //add as player 1
 			addPlayer1(socket);
 			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
 			console.log(game); //test+++++++++++++++++++++++++++
-		}else if(game.player1 != '' && game.player2 === ''){ //add as player 2
+		}else if(game.player1 != '' && game.player2 === '' && socket.nickname != undefined){ //add as player 2
 			addPlayer2(socket);
 			io.sockets.emit('new message', {msg: socket.nickname+' joined the game!', nick: 'robot'});
 			console.log(game); //test+++++++++++++++++++++++++++
@@ -165,13 +169,14 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 
 		//game end------------------------------------------
 		if(game.round === 3){
-			io.sockets.in(gameBoard).emit('game message', {msg:"Game Over", alert: 'alert-success'});
+			io.sockets.in(gameBoard).emit('alert', {msg:"Game Over", alert: 'alert-success'});
 			if(game.p1score > game.p2score){ //player 1 wins
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
 				io.to(game.p2socket).emit('hide board');
 				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
+				getSocket(game.p2socket).leave(gameBoard);
 				resetGame(getSocket(game.p1socket));
 			}else if(game.p1score < game.p2score){ //player 2 wins
 				var diff = game.p2score - game.p1score;
@@ -179,6 +184,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 				io.to(game.p1socket).emit('hide board');
 				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
+				getSocket(game.p1socket).leave(gameBoard);
 				resetGame(getSocket(game.p2socket));
 			}else { //to do: tie logic
 				io.sockets.in(gameBoard).emit('alert', {msg: "y'all tied!, rematch?", alert: "alert-info"});
