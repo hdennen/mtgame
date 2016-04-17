@@ -103,7 +103,7 @@ jQuery(function($){
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-		$movie.html(data.movies[data.round][0]);
+		$movie.html('').html(data.movies[data.round][0]);
 	});	
 
 });
