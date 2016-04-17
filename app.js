@@ -80,7 +80,7 @@ function startGame(){ //run the game
 	console.log(game); //test+++++++++++++++++++++++++++
 }
 
-function resetGame(socket){ //resets and puts winner as player 1
+function resetGame(socket){ //resets and puts winner as player 1, to do: check for empty socket? meh, soft fails and resets empty game anyway...
 	console.log("resetting game."); //test+++++++++++++++++++++++++++
 	gameRunning = false;
 	game = new Game();
@@ -108,6 +108,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			socket.nickname = data; //store each user with socket as property of socket.
 			nicknames.push(socket.nickname);
 			updateNicks();
+			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade. Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year. Highest points after 8 rounds wins!', nick: 'robot'});
 		}
 	});
 
@@ -175,10 +176,12 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 
 		//game end------------------------------------------
 		if(game.round === 3){
-			io.sockets.in(gameBoard).emit('alert', {msg:"Game Over", alert: 'alert-success'});
+			io.sockets.in(gameBoard).emit('alert', {msg:"Game Over", alert: 'alert-info'});
+			//io.sockets.in(gameBoard).emit('reset round');
 			if(game.p1score > game.p2score){ //player 1 wins
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
+				io.to(game.p2socket).emit('reset round');
 				io.to(game.p2socket).emit('hide board');
 				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
@@ -187,6 +190,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			}else if(game.p1score < game.p2score){ //player 2 wins
 				var diff = game.p2score - game.p1score;
 				io.sockets.emit('new message', {msg: game.player2+' won the last game by ' + diff +' points!', nick: 'robot'});
+				io.to(game.p2socket).emit('reset round');
 				io.to(game.p1socket).emit('hide board');
 				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
@@ -207,8 +211,9 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		if(!socket.nickname) return; //if leaving before setting nickname
 		nicknames.splice(nicknames.indexOf(socket.nickname), 1); //splice user from array
 		updateNicks();
-		socket.emit('leave arcade');
+		socket.emit('leave arcade'); //will reset to nickname page
 		if(socket.nickname === game.player1){
+			io.sockets.in(gameBoard).emit('reset round');
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
 			//reset game
@@ -221,6 +226,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			console.log(game); //test+++++++++++++++++++++++++++
 
 		}else if(socket.nickname === game.player2){
+			io.sockets.in(gameBoard).emit('reset round');
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
 			//reset game

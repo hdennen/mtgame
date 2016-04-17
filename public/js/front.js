@@ -20,6 +20,8 @@ jQuery(function($){
 	var $sendAnswer = $('#send-answer');
 	var $answer = $('#answer');
 	var $wait = $('#waiting');
+	var $rounds = $('#rounds');
+	var round = 0;
 
 	var	$p1 = $('#p1nick');
 	var	$p2 = $('#p2nick');
@@ -55,15 +57,17 @@ function keepFading($obj) {
  //nicknames controls==============================
 	$nickForm.submit(function(e){
 		e.preventDefault();
-		socket.emit('new user', $nickBox.val(), function(data){
-			if(data){
-				$('#nickWrap').hide();
-				$('#contentWrap').show();
-			} else {
-				$nickError.html("Somebody's already using that one :( try again.").addClass('alert alert-danger').show().delay(1000).fadeOut("slow");
-			}
-		});
-		$nickBox.val('');
+		if($nickBox.val().length > 0){
+			socket.emit('new user', $nickBox.val(), function(data){
+				if(data){ //callback comes back true
+					$('#nickWrap').hide();
+					$('#contentWrap').show();
+				} else {
+					$nickError.html("Somebody's already using that one :( try again.").addClass('alert alert-danger').show().delay(1000).fadeOut("slow");
+				}
+			});
+			$nickBox.val('');
+		}
 	});
 
 	//chat controls====================================
@@ -84,7 +88,7 @@ function keepFading($obj) {
 	//receive message
 	socket.on('new message', function(data){
 		if(data.nick === 'robot'){
-			$chat.append('<p class="alert alert-info"><b>'+ data.nick + ': </b>' + data.msg + "</p>");
+			$chat.append('<i><b>'+ data.nick + ': </b>' + data.msg + "</i></br>");
 		}else{
 			$chat.append('<b>'+ data.nick + ': </b>' + data.msg + "</br>");
 		}
@@ -112,7 +116,9 @@ function keepFading($obj) {
 	});
 
 	socket.on('alert', function(data){
-		$alerts.html(data.msg).removeClass().addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
+		var alertHash = (0|Math.random()*9e6).toString(36);
+		$alerts.html("<div id='"+alertHash+"' class='alert "+data.alert+"'>"+data.msg+"</div>");
+		$("#"+alertHash).delay(2000).fadeOut("slow").remove();
 	});
 
  	socket.on('show board', function(){
@@ -126,12 +132,22 @@ function keepFading($obj) {
 	socket.on('start', function(){
 		$wait.stop().hide();
 		$submission.prop('disabled', false);
-	})
+	});
 	socket.on('wait', function(){
 		$wait.show();
 		keepFading($($wait));
 		$submission.prop('disabled', true);
-	})
+	});
+	socket.on('reset round', function(){
+		round = 0;
+		$p1.html('');
+		$p2.html('');
+		$p1s.html('');
+		$p2s.html('');
+		$movie.html('');
+		$rounds.html('');
+		console.log("reset to round "+$rounds);
+	});
 
   //game play updates =======================================
 	socket.on('game message', function(data){
@@ -143,7 +159,15 @@ function keepFading($obj) {
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-		$movie.html('').html(data.movies[data.round][0]);
+		if(data.round+1 != round){
+			$movie.slideUp("fast", function(){ //callback so switch happens out of sight
+				$movie.html('').html(data.movies[data.round][0]).slideDown();
+			});
+			$rounds.fadeOut("fast", function(){ //callback so fade back in with new number.
+				round++;
+				$rounds.html('').html('round: '+round).fadeIn("fast");
+			});
+		}
 	});	
 
 	socket.on('points', function(data){

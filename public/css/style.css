@@ -8,7 +8,8 @@
 
 #chat{
 	height: 500px;
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-wrap: break-word;
 }
 #contentWrap{
 	display: none;
@@ -34,12 +35,16 @@
     font-size: 32px;
     margin: 40px 0px;
 }
-#gameNotes{
+#rounds{
+	display: none;
+}
+.notes-holder{
 	height: 100px;
 }
+#gameNotes{
+}
 #waiting{
-	width:90%;
-	margin:10px 2%;
+	margin:10px 0px;
 	font-size: 18px;
 }
 
@@ -50,6 +55,9 @@ h1{
 .blips{
 	margin-top: -34px;
 	display: none;
+}
+.movies-area{
+	height: 170px;
 }
 
 @media only screen and (max-device-width : 480px) {
