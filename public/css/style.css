@@ -18,8 +18,7 @@
 
 }
 #gameAreaWrap{
-	min-height: 568px;
-	height:100vh;
+  height: 500px;
 	padding-top: 100px;/*if not read vh*/
 	padding-top:20vh;
 }
@@ -70,5 +69,14 @@ h1{
 	#setNick input[type=submit]{
     margin: 20px auto;
     display: block;
+	}
+	#chat{
+	height: 250px;
+	overflow-y: scroll;
+	overflow-wrap: break-word;
+	}
+	#gameAreaWrap{
+		min-height: 568px;
+		height:100vh;
 	}
 }
