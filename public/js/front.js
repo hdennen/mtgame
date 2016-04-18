@@ -177,7 +177,7 @@ function keepFading($obj) {
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-		if(data.round+1 > round){ //populate next round data
+		if(data.round+1 > round && data.round<8){ //populate next round data
 				$movie.slideUp("fast", function(){ //callback so switch happens out of sight
 					$movie.html('').html(data.movies[data.round][0]).slideDown();
 					console.log(data.movies[data.round][0]);
