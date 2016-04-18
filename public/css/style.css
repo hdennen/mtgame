@@ -18,7 +18,9 @@
 
 }
 #alerts {
-    position: fixed;
+  position: absolute;
+  width: 95%;
+  text-align: center;
 }
 #gameAreaWrap{
   height: 500px;
