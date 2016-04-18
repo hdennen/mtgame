@@ -17,6 +17,9 @@
 #chatWrap{
 
 }
+#alerts {
+    position: fixed;
+}
 #gameAreaWrap{
   height: 500px;
 	padding-top: 100px;/*if not read vh*/
