@@ -17,6 +17,12 @@
 #chatWrap{
 
 }
+#gameAreaWrap{
+	min-height: 568px;
+	height:100vh;
+	padding-top: 100px;/*if not read vh*/
+	padding-top:20vh;
+}
 #joinWrap{
 	margin:20px 0px;
 }

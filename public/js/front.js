@@ -13,6 +13,7 @@ jQuery(function($){
 	var $alerts = $('#alerts');
 	var $join = $('#join-request');
 	var $joinWrap = $('#joinWrap');
+	var $gameArea = $('#gameAreaWrap');
 	var $playWrap = $('#playWrap');
 	var $gameNotes = $('#gameNotes');
 	var $movie = $('#movieStuff');
@@ -99,7 +100,7 @@ function keepFading($obj) {
 	//to do: do some check scroll magic on new message.
 
 	//leave arcade
-	socket.on('leave arcade', function(){
+	socket.on('leave arcade', function(){ //on disconnect
 		$('#contentWrap').hide();
 		$('#nickWrap').show();
 	});
@@ -117,10 +118,14 @@ function keepFading($obj) {
 		$answer.val('');
 	});
 
-	socket.on('alert', function(data){
-		var alertHash = (0|Math.random()*9e6).toString(36);
-		$alerts.html("<div id='"+alertHash+"' class='alert "+data.alert+"'>"+data.msg+"</div>");
-		$("#"+alertHash).delay(2000).fadeOut("slow").remove();
+	socket.on('alert', function(data){ //for multiple notifications. 1create div, 2add id, 3pop based on id.
+		var $alertHash = (0|Math.random()*9e6).toString(36);
+		var $alertDiv = $("<div>", {"id": $alertHash, "class": 'alert '+data.alert}).html(data.msg);
+		console.log($alertHash +" "+ $alertDiv); //test+++++++++++++++++++++++++++++++++++
+		$alerts.append($alertDiv);
+		$($alertDiv).show("fast").delay(2000).fadeOut("slow", function(){
+			$alertDiv.remove();
+		});
 	});
 
  	socket.on('show board', function(){
@@ -134,6 +139,8 @@ function keepFading($obj) {
 	socket.on('start', function(){
 		$wait.stop().hide();
 		$submission.prop('disabled', false);
+		$answer.focus();
+		//$('body').scrollTo($gameArea,{duration:'fast'});
 	});
 	socket.on('wait', function(){
 		$wait.show();
@@ -146,14 +153,23 @@ function keepFading($obj) {
 		$p2.html('');
 		$p1s.html('');
 		$p2s.html('');
-		$movie.html('');
-		$rounds.html('');
-		console.log("reset client "+$rounds);
+		$movie.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
+		$rounds.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
+		console.log("reset client "); //test +++++++++++++++++++++++++++++++++
 	});
 
   //game play updates =======================================
 	socket.on('game message', function(data){
-		$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
+		//$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
+
+		var $noteHash = (0|Math.random()*9e6).toString(36);
+		var $noteDiv = $("<div>", {"id": $noteHash, "class": 'alert '+data.alert}).html(data.msg);
+		console.log($noteHash +" "+ $noteDiv); //test+++++++++++++++++++++++++++++++++++
+		$gameNotes.append($noteDiv);
+		$($noteDiv).show("fast").delay(2000).fadeOut("slow", function(){
+			$noteDiv.remove();
+		});
+
 	});
 
 	socket.on('game data', function(data){ //gets whole object at first.
@@ -161,19 +177,25 @@ function keepFading($obj) {
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-	if(data.round+1 > round || data.round === 0){ //populate next round data
-			$movie.slideUp("fast", function(){ //callback so switch happens out of sight
-				$movie.html('').html(data.movies[data.round][0]).slideDown();
-				console.log(data.movies[data.round][0]);
-			});
-			$rounds.fadeOut("fast", function(){ //callback so fade back in with new number.
+		if(data.round+1 > round){ //populate next round data
+				$movie.slideUp("fast", function(){ //callback so switch happens out of sight
+					$movie.html('').html(data.movies[data.round][0]).slideDown();
+					console.log(data.movies[data.round][0]);
+				});
+				$rounds.fadeOut("fast", function(){ //callback so fade back in with new number.
+					round = data.round+1;
+					$rounds.html('').html('round: '+round).fadeIn("fast");
+				});
+		}else if(data.p1score === 0 && data.p2score === 0 && data.player2.length > 0){ //first game data
+				$movie.html('').html(data.movies[data.round][0]).fadeIn("fast");
 				round = data.round+1;
 				$rounds.html('').html('round: '+round).fadeIn("fast");
-			});
-		}else if (data.player2===''){ //null these while waiting
-			$movie.html('');
-			round = 0;
-			$rounds.html('');
+				console.log("first data"); //test +++++++++++++++++++++++++++++++++
+		}else if(data.player2.length === 0){ //null these while waiting
+				$movie.html('');
+				round = 0;
+				$rounds.html('');
+				console.log("data reset"); //test +++++++++++++++++++++++++++++++++
 		}
 	});	
 
