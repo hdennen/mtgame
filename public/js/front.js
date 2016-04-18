@@ -82,8 +82,10 @@ function keepFading($obj) {
 
 	$messageForm.submit(function(e){ //bind event handler to message form. on each submit, send message to server. function with event as param.
 		e.preventDefault(); //stops from refreshing the whole page.
-		socket.emit('send message', $messageBox.val());
-		$messageBox.val('');
+		if($messageBox.val() != ''){ //no accidental clicks
+			socket.emit('send message', $messageBox.val());
+			$messageBox.val('');
+		}
 	});
 	//receive message
 	socket.on('new message', function(data){
@@ -138,7 +140,7 @@ function keepFading($obj) {
 		keepFading($($wait));
 		$submission.prop('disabled', true);
 	});
-	socket.on('reset round', function(){
+	socket.on('reset client', function(){
 		round = 0;
 		$p1.html('');
 		$p2.html('');
@@ -146,7 +148,7 @@ function keepFading($obj) {
 		$p2s.html('');
 		$movie.html('');
 		$rounds.html('');
-		console.log("reset to round "+$rounds);
+		console.log("reset client "+$rounds);
 	});
 
   //game play updates =======================================
@@ -159,14 +161,19 @@ function keepFading($obj) {
 		$p2.html(data.player2);
 		$p1s.html(data.p1score);
 		$p2s.html(data.p2score);
-		if(data.round+1 != round){
+	if(data.round+1 > round || data.round === 0){ //populate next round data
 			$movie.slideUp("fast", function(){ //callback so switch happens out of sight
 				$movie.html('').html(data.movies[data.round][0]).slideDown();
+				console.log(data.movies[data.round][0]);
 			});
 			$rounds.fadeOut("fast", function(){ //callback so fade back in with new number.
-				round++;
+				round = data.round+1;
 				$rounds.html('').html('round: '+round).fadeIn("fast");
 			});
+		}else if (data.player2===''){ //null these while waiting
+			$movie.html('');
+			round = 0;
+			$rounds.html('');
 		}
 	});	
 

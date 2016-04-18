@@ -27,7 +27,7 @@ function Game(){ //game object
 	this.p2socket = '';
 	this.keys = [];
 	this.round = 0;
-	this.movies = [];
+	this.movies = [['','']];
 }
 
 function getMovies(){ //do once to reduce api calls
@@ -63,6 +63,7 @@ function genKeys(){ //8 random keys for movies
 }
 
 function popMovies(){ //populate movies based on keys
+	game.movies = [];
 	for(var item of game.keys){
 		game.movies.push([topMovies.data.movies[item].title, topMovies.data.movies[item].year]);
 	}
@@ -86,7 +87,7 @@ function resetGame(socket){ //resets and puts winner as player 1, to do: check f
 	game = new Game();
 	addPlayer1(socket);
 	io.sockets.in(gameBoard).emit('game data', game);
-	console.log(game); //test+++++++++++++++++++++++++++
+	//console.log(game); //test+++++++++++++++++++++++++++
 }
 
 function getSocket(socketID){
@@ -177,11 +178,11 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		//game end------------------------------------------
 		if(game.round === 3){
 			io.sockets.in(gameBoard).emit('alert', {msg:"Game Over", alert: 'alert-info'});
-			//io.sockets.in(gameBoard).emit('reset round');
+			//io.sockets.in(gameBoard).emit('reset client');
 			if(game.p1score > game.p2score){ //player 1 wins
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
-				io.to(game.p2socket).emit('reset round');
+				//io.to(game.p2socket).emit('reset client');
 				io.to(game.p2socket).emit('hide board');
 				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
@@ -190,7 +191,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			}else if(game.p1score < game.p2score){ //player 2 wins
 				var diff = game.p2score - game.p1score;
 				io.sockets.emit('new message', {msg: game.player2+' won the last game by ' + diff +' points!', nick: 'robot'});
-				io.to(game.p2socket).emit('reset round');
+				//io.to(game.p1socket).emit('reset client');
 				io.to(game.p1socket).emit('hide board');
 				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
