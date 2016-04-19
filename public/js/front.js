@@ -182,6 +182,7 @@ jQuery(function($){
 			$noteDiv.remove();
 		});
 		$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 1000); //make sure mobile users can see notifications.
+		$answer.delay(3000).focus();
 
 	});
 	//receive game data -------------------------------------
