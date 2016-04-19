@@ -29,31 +29,48 @@ jQuery(function($){
 	var	$p1s = $('#p1score');
 	var	$p2s = $('#p2score');
 
-function slideFade(elem) {
-	$(elem).removeAttr( 'style' );
-	if(elem === "#p1up" || elem === "#p2up"){
-		$(elem).addClass('text-success');
-	}else{
-		$(elem).addClass('text-danger');
-	}
-	$(elem).show();
-	$(elem).animate({
-	    opacity: 0,
-	    //height: 0,
-	    marginTop: -100,
-	    //marginBottom: 0,
-	    //paddingTop: 0,
-	    //paddingBottom: 0
-	}, 'slow', function() {
-	    $(this).hide();
-	});
-}
+	//spectator vars
+	var $spectateWrap = $('#spectateWrap');
+	var $spectateNotes = $('#spectateNotes');
+	var $spectateInfo = $('#spectateInfo');
 
-function keepFading($obj) {
-    $obj.fadeToggle(800, function () {
-        keepFading($obj)
-    });
-}
+	function slideFade(elem) {
+		$(elem).removeAttr( 'style' );
+		if(elem === "#p1up" || elem === "#p2up"){
+			$(elem).addClass('text-success');
+		}else{
+			$(elem).addClass('text-danger');
+		}
+		$(elem).show();
+		$(elem).animate({
+		    opacity: 0,
+		    //height: 0,
+		    marginTop: -100,
+		    //marginBottom: 0,
+		    //paddingTop: 0,
+		    //paddingBottom: 0
+		}, 'slow', function() {
+		    $(this).hide();
+		});
+	}
+
+	function keepFading($obj) {
+	    $obj.fadeToggle(800, function () {
+	        keepFading($obj)
+	    });
+	}
+	function resetClient(){
+		round = 0;
+		$p1.html('');
+		$p2.html('');
+		$p1s.html('');
+		$p2s.html('');
+		$movie.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
+		$rounds.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
+		$spectateNotes.html('');
+		$spectateInfo('');
+		console.log("reset client "); //test +++++++++++++++++++++++++++++++++
+	}
 
  //nicknames controls==============================
 	$nickForm.submit(function(e){
@@ -107,7 +124,7 @@ function keepFading($obj) {
 
 
 
-	//game controls=====================================
+	//game controls=====================================================
 	$join.submit(function(e){ //join
 		e.preventDefault();
 		socket.emit('join request'); //it has the nickname data
@@ -131,6 +148,7 @@ function keepFading($obj) {
  	socket.on('show board', function(){
 		$playWrap.show();
 		$joinWrap.hide();
+		$spectateWrap.hide();
 	});
 	 socket.on('hide board', function(){
 		$playWrap.hide();
@@ -148,30 +166,25 @@ function keepFading($obj) {
 		$submission.prop('disabled', true);
 	});
 	socket.on('reset client', function(){
-		round = 0;
-		$p1.html('');
-		$p2.html('');
-		$p1s.html('');
-		$p2s.html('');
-		$movie.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
-		$rounds.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
-		console.log("reset client "); //test +++++++++++++++++++++++++++++++++
+		resetClient();
 	});
 
-  //game play updates =======================================
+  //game play updates =========================================================
+  //game alerts ------------------------------------------
 	socket.on('game message', function(data){
 		//$gameNotes.removeClass().html(data.msg).addClass('alert '+data.alert).show().delay(1000).fadeOut("slow");
 
-		var $noteHash = (0|Math.random()*9e6).toString(36);
+		var $noteHash = (0|Math.random()*9e6).toString(36); //this takes care of multiple notifications.
 		var $noteDiv = $("<div>", {"id": $noteHash, "class": 'alert '+data.alert}).html(data.msg);
 		console.log($noteHash +" "+ $noteDiv); //test+++++++++++++++++++++++++++++++++++
 		$gameNotes.append($noteDiv);
-		$($noteDiv).show("fast").delay(2000).fadeOut("slow", function(){
+		$($noteDiv).show("fast").delay(3000).fadeOut("slow", function(){
 			$noteDiv.remove();
 		});
+		$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 1000); //make sure mobile users can see notifications.
 
 	});
-
+	//receive game data -------------------------------------
 	socket.on('game data', function(data){ //gets whole object at first.
 		$p1.html(data.player1);
 		$p2.html(data.player2);
@@ -198,7 +211,7 @@ function keepFading($obj) {
 				console.log("data reset"); //test +++++++++++++++++++++++++++++++++
 		}
 	});	
-
+	//scoring points ----------------------------------------------
 	socket.on('points', function(data){
 		if(data.player === "p1"){
 			if(data.type === "up"){
@@ -213,6 +226,17 @@ function keepFading($obj) {
 			}else{
 				slideFade($('#p2down'));
 			}
+		}
+	});
+
+	//spectator updates ======================================================
+	socket.on('spectator message', function(data){
+		if(data.cmd === 'game running'){
+			$spectateWrap.show();
+			$spectateNotes.html(data.msg);
+		}else if(data.cmd === 'game stopped'){
+			$spectateNotes.html(data.msg);
+			$spectateWrap.delay(1000).fadeOut(800);
 		}
 	});
 

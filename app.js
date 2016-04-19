@@ -9,10 +9,14 @@ var nicknames = []; //to do: set a limit on this.
 var game = new Game(); //maybe do: dynamically instantiate this for multiple simultanious games later
 var gameRunning = false;
 var gameBoard = 'gameBoard'; //use socket.io's rooms functionality
+var spectators = 'spectators'; //room for spectators, everyone auto joined.
 
 var topMoviesAPI = '';//store movies to reduce api calls (I only get 2000);
-var topMovies = '';
-getMovies();
+var topMovies = ''; //UNCOMMENT FOR PRODUCTION+++++++++++
+getMovies(); //UNCOMMENT FOR PRODUCTION++++++++++
+
+
+
 server.listen(3000);
 app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs... sorry angular.
 //getMovies(); //api call on app start. works fine, but for some reason can't use var filled from api call.
@@ -45,6 +49,7 @@ function getMovies(){ //do once to reduce api calls
 function addPlayer1(socket){ //socket id and nickname
 	game.player1 = socket.nickname; //passed from socket.nickname
 	game.p1socket = socket.id; //store player's socket in game
+	socket.leave(spectators);
 	socket.join(gameBoard);
 	socket.emit('show board');
 	socket.emit('wait');
@@ -53,6 +58,7 @@ function addPlayer1(socket){ //socket id and nickname
 function addPlayer2(socket){
 	game.player2 = socket.nickname; //passed from socket.nickname
 	game.p2socket = socket.id; //store player's socket in game
+	socket.leave(spectators);
 	socket.join(gameBoard);
 	socket.emit('show board');
 	socket.emit('game message', {msg:"You're in!", alert: 'alert-success'});
@@ -85,6 +91,7 @@ function startGame(){ //run the game
 	io.sockets.in(gameBoard).emit('game data', game);
 	io.sockets.in(gameBoard).emit('game message', {msg:"The game is afoot!", alert: 'alert-success'});
 	io.sockets.in(gameBoard).emit('start');
+	io.sockets.in(spectators).emit('spectator message', {cmd:'game running', msg: game.player1 + " and " + game.player2 + " are currently playing."}); //on new join too if gameRunning===true
 	console.log(game); //test+++++++++++++++++++++++++++
 }
 
@@ -102,11 +109,34 @@ function getSocket(socketID){
 	return io.sockets.sockets[socketID];;
 }
 
+function wrongAnswerHelp(data, socket){
+	var diff = Math.abs(data - game.movies[game.round][1]);
+	if(data === ''){
+		socket.emit('game message', {msg:"Did you accidentally submit? Tough, you still lose points.", alert:"alert-danger"});
+	}else if(diff < 4){
+		socket.emit('game message', {msg:"so close!", alert:"alert-success"});
+	}else if(diff < 11){
+		socket.emit('game message', {msg:"Hey, you're within a decade, not too shabby for a guess.", alert:"alert-warning"});
+	}else if(diff < 21){
+		socket.emit('game message', {msg:"ehh, close but not close.", alert:"alert-warning"});
+	}else if(diff < 31){
+		socket.emit('game message', {msg:"You're showing your generation here...", alert:"alert-danger"});
+	}else if(diff < 51){
+		socket.emit('game message', {msg:"almost half a century off, wow...", alert:"alert-danger"});
+	}else {
+		socket.emit('game message', {msg:"You've never heard of this movie have you?", alert:"alert-danger"});
+	}
+	if(data > game.movies[game.round][1]){ //if guess high
+		socket.emit('game message', {msg:"go lower!", alert:"alert-danger"});
+	}else if(data < game.movies[game.round][1]){ //low guess
+		socket.emit('game message', {msg:"go higher!", alert:"alert-info"});
+	}
+};
 
 //turn on connection event, what happens when user sends something. similar to document.ready
 io.sockets.on('connection', function(socket){ //function with user's socket
 
-	//chat controls==========================================
+	//chat controls===========================================================================================================
 
 	socket.on('new user', function(data, callback){
 		if(nicknames.indexOf(data)!= -1){ //check if exists
@@ -116,8 +146,12 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			socket.nickname = data; //store each user with socket as property of socket.
 			nicknames.push(socket.nickname);
 			updateNicks();
-			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade. Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year. Highest points after 8 rounds wins!', nick: 'robot'});
+			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade! </br> Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year (old movies too). </br> 5 points for correct answer, -3 for a wrong answer, highest points after 8 rounds wins!', nick: 'robot'});
 			socket.emit('alert', {msg:"Welcome to the Arcade.", alert: 'alert-success'});
+			socket.join(spectators); //join spectator room
+			if(gameRunning === true){
+				io.sockets.in(spectators).emit('spectator message', {cmd:'game running', msg: game.player1 + " and " + game.player2 + " are currently playing."});
+			}
 		}
 	});
 
@@ -125,13 +159,13 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		io.sockets.emit('usernames', nicknames); //resend list of users
 	}
 
-	socket.on('send message', function(data){ //do something with message data
+	socket.on('send message', function(data){ //put user message in group chat
 		io.sockets.emit('new message', {msg: data, nick: socket.nickname});
 	});
 
 
 
-	//game controls ==========================
+	//game controls ================================================================================
 
 	//join game-------------------
 	socket.on('join request', function(){ //add players to game
@@ -174,11 +208,13 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			if(socket.nickname === game.player1){
 				game.p1score -= 3;
 				io.sockets.in(gameBoard).emit('points', {msg:"-3", type:"down", player:"p1"});
-				socket.emit('game message', {msg:"Oh no!", alert:"alert-danger"});
+				wrongAnswerHelp(data, socket);
+				
 			}else if(socket.nickname === game.player2){
 				game.p2score -= 3;
 				io.sockets.in(gameBoard).emit('points', {msg:"-3", type:"down", player:"p2"});
-				socket.emit('game message', {msg:"Oh no!", alert:"alert-danger"});
+				wrongAnswerHelp(data, socket);
+				//socket.emit('game message', {msg:"Oh no!", alert:"alert-danger"});
 			}
 		}
 		io.sockets.in(gameBoard).emit('game data', game);
@@ -187,28 +223,34 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		if(game.round === 8){
 			io.sockets.in(gameBoard).emit('alert', {msg:"Game Over", alert: 'alert-info'});
 			io.sockets.in(gameBoard).emit('reset client');
+			var p1fullSock = getSocket(game.p1socket);
+			var p2fullSock = getSocket(game.p2socket);
 			if(game.p1score > game.p2score){ //player 1 wins
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
 				io.to(game.p2socket).emit('hide board');
 				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
-				getSocket(game.p2socket).leave(gameBoard);
-				resetGame(getSocket(game.p1socket));
+				p2fullSock.leave(gameBoard);
+				p2fullSock.join(spectators);
+				resetGame(p1fullSock); //put player 1 in a new game
 			}else if(game.p1score < game.p2score){ //player 2 wins
 				var diff = game.p2score - game.p1score;
 				io.sockets.emit('new message', {msg: game.player2+' won the last game by ' + diff +' points!', nick: 'robot'});
 				io.to(game.p1socket).emit('hide board');
 				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
 				//reset game
-				getSocket(game.p1socket).leave(gameBoard);
-				resetGame(getSocket(game.p2socket));
+				p1fullSock.leave(gameBoard);
+				p1fullSock.join(spectators);
+				resetGame(p2fullSock);
 			}else { //if they tie then they both lose and the game resets.
 				io.sockets.in(gameBoard).emit('hide board');
 				io.sockets.in(gameBoard).emit('alert', {msg: "y'all tied! So you're both off the board :)", alert: "alert-danger"});
 				io.sockets.in(gameBoard).emit('reset client');
-				getSocket(game.p1socket).leave(gameBoard);
-				getSocket(game.p2socket).leave(gameBoard);
+				p1fullSock.leave(gameBoard);
+				p1fullSock.join(spectators);
+				p2fullSock.leave(gameBoard);
+				p2fullSock.join(spectators);
 				game = new Game();
 				gameRunning = false;
 			}
@@ -226,22 +268,25 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 		updateNicks();
 		socket.emit('leave arcade'); //will reset to nickname page
 		if(socket.nickname === game.player1){
-			io.sockets.in(gameBoard).emit('reset round');
+			//io.sockets.in(gameBoard).emit('reset client');
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
+			io.sockets.in(spectators).emit('spectator message', {cmd:'game stopped', msg: "You can join now."});
+			//io.sockets.in(spectators).emit('spectator message', {cmd:'game running', msg: "game ended."});
 			//reset game
 			if(game.p2socket){
 				resetGame(getSocket(game.p2socket));
 			}else{
 				game = new Game();
 			}
-
+			
 			console.log(game); //test+++++++++++++++++++++++++++
 
 		}else if(socket.nickname === game.player2){
-			io.sockets.in(gameBoard).emit('reset round');
+			//io.sockets.in(gameBoard).emit('reset client');
 			gameRunning = false;
 			io.sockets.emit('new message', {msg: socket.nickname+' aborted game and left the arcade.', nick: 'robot'});
+			io.sockets.in(spectators).emit('spectator message', {cmd:'game stopped', msg: "You can join now."});
 			//reset game
 			resetGame(getSocket(game.p1socket));
 

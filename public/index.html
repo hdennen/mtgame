@@ -6,8 +6,8 @@
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 			<!-- Mobile Specific Meta -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-
 	<link rel="stylesheet" type="text/css" href="css/style.css"></link>
+	
 </head>
 <body>
 	<div id="nickWrap" class="container">
@@ -28,93 +28,102 @@
 	</div>
 
 	<!-- errthing in contentWrap is hidden until user has a nickname. -->
-	<div id="contentWrap" class="container"> 
-		<h1>H's Arcade: Movie Trivia</h1>
-		<div class="row">
-			<div class="col-md-4">
-				<div id="chatWrap" class="well">
-					<div id="chat"></div>
-					<form id="send-message" autocomplete="off">
-						<div class="form-group">
-							<input id="message" class="form-control" placeholder="u wot m8?" maxlength="50"></input>
-							<input type="submit" value="send" class="btn btn-primary btn-block"></input>
-						</div>
-					</form>
-				</div>
+	<div id="contentWrap"> 
+		<div class="title-area container-fluid">
+			<div class="title container">
+				<h1 class="page-title">H's Arcade: Movie Trivia</h1>
 			</div>
-			<div class="col-md-3">
-				<div class="well">
-					<div id="users"></div>
-				</div>
-			</div>
-
-			<!-- This'll be the game board - arcade style where winner stays -->
-			<div class="col-md-5">
-				<div id="alerts"></div>
-				<div id="gameAreaWrap">
-					<div id="joinWrap" class="text-center">
-						<form id="join-request" class="form-inline">
-							<input type="submit" value="Join Game" class="btn btn-lg btn-success"></input>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4">
+					<div id="chatWrap" class="well">
+						<div id="chat"></div>
+						<form id="send-message" autocomplete="off">
+							<div class="form-group">
+								<input id="message" class="form-control" placeholder="u wot m8?" maxlength="50"></input>
+								<input type="submit" value="send" class="btn btn-primary btn-block"></input>
+							</div>
 						</form>
 					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="well">
+						<div id="users"></div>
+					</div>
+				</div>
 
-					<div id="spectateWrap"></div>
-
-					<div id="playWrap">
-						
-						<div id="totalsWrap" class="">
-
-							<div class="row">
-								<div class="col-xs-5 nick text-center">
-									<div id="p1nick"></div>
-								</div>
-								<div class="col-xs-2 text-center">
-									<div id="vs">vs</div>
-								</div>
-								<div class="col-xs-5 nick text-center">
-									<div id="p2nick"></div>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-xs-5 score text-center">
-									<div id="p1score"></div>
-									<div id="p1up" class="blips">+5</div>
-									<div id="p1down" class="blips">-3</div>
-								</div>
-								<div class="col-xs-2  text-center">
-									<div id="dash">-</div>
-								</div>
-								<div class="col-xs-5 score text-center">
-									<div id="p2score"></div>
-									<div id="p2up" class="blips">+5</div>
-									<div id="p2down" class="blips">-3</div>
-								</div>
-							</div>
+				<!-- This'll be the game board - arcade style where winner stays -->
+				<div class="col-md-5">
+					<div id="alerts"></div>
+					<div id="gameAreaWrap">
+						<div id="joinWrap" class="text-center">
+							<form id="join-request" class="form-inline">
+								<input type="submit" value="Join Game" class="btn btn-lg btn-success"></input>
+							</form>
 						</div>
 
-						<div class="row">
-							<div class="movies-area">
-								<div id="waiting" class="col-xs-12 text-center">waiting for player 2...</div>
-								<div id="movieStuff" class="col-xs-12 text-center"></div>
-							</div>
-							<div class="row">
-								<div id="rounds" class="col-xs-12 text-center"></div>
-							</div>
+						<div id="spectateWrap" class="">
+							<div id="spectateNotes" class="alert alert-info text-center"></div>
+							<div id="spectateInfo" class=""></div>
 						</div>
-						<div class="row">
-							<div id="answerWrap" class="col-xs-12 text-center">
-								<form id="send-answer" class="form-inline" autocomplete="off">
-									<fieldset id="submission">
-										<input id="answer" class="form-control" placeholder="year" maxlength="4"></input>
-										<input type="submit" value="Answer!" class="btn btn-success"></input>
-									</fieldset>
-								</form>
-							</div>
+
+						<div id="playWrap">
 							
-						</div>
-						<div class="row">
-							<div class="notes-holder col-xs-12 text-center">
-								<div id="gameNotes" class=""></div> <!-- notifications -->
+							<div id="totalsWrap" class="">
+
+								<div class="row">
+									<div class="col-xs-5 nick text-center">
+										<div id="p1nick"></div>
+									</div>
+									<div class="col-xs-2 text-center">
+										<div id="vs">vs</div>
+									</div>
+									<div class="col-xs-5 nick text-center">
+										<div id="p2nick"></div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-5 score text-center">
+										<div id="p1score"></div>
+										<div id="p1up" class="blips">+5</div>
+										<div id="p1down" class="blips">-3</div>
+									</div>
+									<div class="col-xs-2  text-center">
+										<div id="dash">-</div>
+									</div>
+									<div class="col-xs-5 score text-center">
+										<div id="p2score"></div>
+										<div id="p2up" class="blips">+5</div>
+										<div id="p2down" class="blips">-3</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="movies-area">
+									<div id="waiting" class="col-xs-12 text-center">waiting for player 2...</div>
+									<div id="movieStuff" class="col-xs-12 text-center"></div>
+								</div>
+								<div class="row">
+									<div id="rounds" class="col-xs-12 text-center"></div>
+								</div>
+							</div>
+							<div class="row">
+								<div id="answerWrap" class="col-xs-12 text-center">
+									<form id="send-answer" class="form-inline" autocomplete="off">
+										<fieldset id="submission">
+											<input id="answer" class="form-control" placeholder="year" maxlength="4"></input>
+											<input type="submit" value="Answer!" class="btn btn-success"></input>
+										</fieldset>
+									</form>
+								</div>
+								
+							</div>
+							<div class="row">
+								<div class="notes-holder col-xs-12 text-center">
+									<div id="gameNotes" class=""></div> <!-- notifications -->
+								</div>
 							</div>
 						</div>
 					</div>
@@ -127,5 +136,8 @@
 	<script src="/socket.io/socket.io.js"></script>
   <script src="js/front.js"></script>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+  <style>body{background-color: #f0f0f0;font-family: 'Droid Sans', sans-serif;} .well{background-color: #fff;}</style>
 </body>
 </html>

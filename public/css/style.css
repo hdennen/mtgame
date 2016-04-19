@@ -1,3 +1,6 @@
+
+
+
 #nickWrap{
 
 }
@@ -23,7 +26,7 @@
   text-align: center;
 }
 #gameAreaWrap{
-  height: 500px;
+  height: 800px;
 	padding-top: 100px;/*if not read vh*/
 	padding-top:20vh;
 }
@@ -32,6 +35,7 @@
 }
 #playWrap{
 	display: none;
+	text-shadow: 0 1px 0 #fff;
 }
 #totalsWrap .nick{
 	font-size: 16px;
@@ -58,9 +62,20 @@
 	font-size: 18px;
 }
 
-h1{
+#spectateWrap{
+	display: none;
+}
+.title-area{
+  margin-bottom: 30px;
+  height: 120px;
+  background-color: #FF5F69;
+}
+h1.page-title{
 	text-align: center;
-	font-size: 60px;
+  font-size: 60px;
+  font-family: 'lato';
+  color: #fff;
+  
 }
 .blips{
 	margin-top: -34px;
@@ -69,6 +84,16 @@ h1{
 .movies-area{
 	height: 170px;
 }
+
+@media (max-width : 768px) {
+	input#answer {
+    max-width: 200px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+	}
+}
+
 
 @media only screen and (max-device-width : 480px) {
 	#setNick input[type=submit]{
