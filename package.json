@@ -1,6 +1,9 @@
 {
 	"name":"movietrivia",
 	"version":"0.1.7",
+	"description":"Movie trivia game.",
+	"main":"app.js",
+	"author":"Harry Dennen",
 	"dependencies":{
 		"socket.io":"1.4.5",
 		"express":"4.13.4",
