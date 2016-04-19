@@ -203,8 +203,14 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 				//reset game
 				getSocket(game.p1socket).leave(gameBoard);
 				resetGame(getSocket(game.p2socket));
-			}else { //to do: tie logic
-				io.sockets.in(gameBoard).emit('alert', {msg: "y'all tied!, rematch?", alert: "alert-info"});
+			}else { //if they tie then they both lose and the game resets.
+				io.sockets.in(gameBoard).emit('hide board');
+				io.sockets.in(gameBoard).emit('alert', {msg: "y'all tied! So you're both off the board :)", alert: "alert-danger"});
+				io.sockets.in(gameBoard).emit('reset client');
+				getSocket(game.p1socket).leave(gameBoard);
+				getSocket(game.p2socket).leave(gameBoard);
+				game = new Game();
+				gameRunning = false;
 			}
 			
 
