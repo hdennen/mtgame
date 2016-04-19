@@ -2,11 +2,15 @@
 	"name":"movietrivia",
 	"version":"0.1.7",
 	"description":"Movie trivia game.",
+	"license":"MIT",
+	"repository":"https://github.com/hdennen/mtgame",
 	"main":"app.js",
 	"author":"Harry Dennen",
 	"dependencies":{
 		"socket.io":"1.4.5",
 		"express":"4.13.4",
-		"request":"2.71.0"
+		"request":"2.71.0",
+		"mongoose":"4.4.12",
+		"cheerio":"0.20.0"
 	}
 }
