@@ -85,6 +85,10 @@ h1.page-title{
 .movies-area{
 	height: 170px;
 }
+#boot{
+	display: none;
+	margin-top: 30vh;
+}
 
 @media (max-width : 768px) {
 	input#answer {

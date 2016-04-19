@@ -1,5 +1,4 @@
 // public/js/front.js
-
 jQuery(function($){
 	var socket = io.connect();
 	var $nickForm = $('#setNick');
@@ -60,6 +59,7 @@ jQuery(function($){
 	    });
 	}
 	function resetClient(){
+		console.log("start reset client "); //test +++++++++++++++++++++++++++++++++
 		round = 0;
 		$p1.html('');
 		$p2.html('');
@@ -68,9 +68,24 @@ jQuery(function($){
 		$movie.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
 		$rounds.delay(2000).html(''); //to fix: this gets overwritten due to later callback in game data function
 		$spectateNotes.html('');
-		$spectateInfo('');
-		console.log("reset client "); //test +++++++++++++++++++++++++++++++++
+		$gameNotes.html('');
+		console.log("end reset client "); //test +++++++++++++++++++++++++++++++++
 	}
+
+	var timeoutID;
+	function delayedBoot() {
+	  timeoutID = window.setTimeout(removeMe, 5000);
+	}
+
+	function clearBoot() {
+	  window.clearTimeout(timeoutID);
+	}
+ 	function removeMe(){
+	 	socket.emit('remove me');
+	  $playWrap.hide();
+		$joinWrap.show();
+ 	}
+
 
  //nicknames controls==============================
 	$nickForm.submit(function(e){
@@ -140,7 +155,7 @@ jQuery(function($){
 		var $alertDiv = $("<div>", {"id": $alertHash, "class": 'alert '+data.alert}).html(data.msg);
 		console.log($alertHash +" "+ $alertDiv); //test+++++++++++++++++++++++++++++++++++
 		$alerts.append($alertDiv);
-		$($alertDiv).show("fast").delay(2000).fadeOut("slow", function(){
+		$($alertDiv).show("fast").delay(3000).fadeOut("slow", function(){
 			$alertDiv.remove();
 		});
 	});
@@ -237,8 +252,32 @@ jQuery(function($){
 			$spectateNotes.html(data.msg);
 		}else if(data.cmd === 'game stopped'){
 			$spectateNotes.html(data.msg);
-			$spectateWrap.delay(1000).fadeOut(800);
+			$spectateWrap.delay(3000).fadeOut(800);
 		}
 	});
-
+  $(document).ready(function () {
+    var idleState = false;
+    var idleTimer = null;
+    $('*').bind('mousemove click mouseup mousedown keydown keypress keyup submit change mouseenter scroll resize dblclick', function () {
+      clearTimeout(idleTimer);
+      if (idleState == true) {
+        //reset action  
+        $('#boot').modal('toggle');
+        location.reload();
+      }
+      idleState = false;
+      idleTimer = setTimeout(function () {
+        //idle action
+        $('#boot').modal('toggle');
+        $('#nickWrap').show();
+				$('#contentWrap').hide();
+        socket.disconnect();
+        idleState = true; }, 300000);//disconnect after 5 minutes of no activity.
+    });
+    $("body").trigger("mousemove");
+  });
 });
+
+
+
+

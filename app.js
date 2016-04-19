@@ -150,7 +150,9 @@ function getSocket(socketID){
 
 function wrongAnswerHelp(data, socket){
 	var diff = Math.abs(data - game.movies[game.round][1]);
-	if(data === ''){
+	if(data === 'quit'){
+		removeMe(socket);
+	}else	if(data === ''){
 		socket.emit('game message', {msg:"Did you accidentally submit? Tough, you still lose points.", alert:"alert-danger"});
 	}else if(diff < 4){
 		socket.emit('game message', {msg:"so close!", alert:"alert-success"});
@@ -172,6 +174,30 @@ function wrongAnswerHelp(data, socket){
 	}
 };
 
+function removeMe(socket){
+	socket.leave(gameBoard);
+	socket.join(spectators);
+	io.sockets.in(spectators).emit('spectator message', {cmd:'game stopped', msg: "You can now join!"});
+	socket.emit('reset client');
+	socket.emit('hide board');
+	socket.emit('alert', {msg: "You left the game.", alert: "alert-info"});
+	io.sockets.emit('new message', {msg: socket.nickname+' left the game.', nick: 'robot'});
+	if(io.sockets.adapter.rooms[gameBoard] == undefined){
+		game = new Game();
+	}else if(socket.id === game.p1socket) {
+		var sock = getSocket(game.p2socket);
+		sock.emit('reset client');
+		sock.emit('alert', {msg: "Your opponent bailed.", alert: "alert-info"});
+		resetGame(sock);
+	}else if(socket.id === game.p2socket){
+		var sock = getSocket(game.p1socket);
+		sock.emit('reset client');
+		sock.emit('alert', {msg: "Your opponent bailed.", alert: "alert-info"});
+		resetGame(sock);
+	}
+}
+
+
 //turn on connection event, what happens when user sends something. similar to document.ready
 io.sockets.on('connection', function(socket){ //function with user's socket
 
@@ -185,7 +211,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			socket.nickname = data; //store each user with socket as property of socket.
 			nicknames.push(socket.nickname);
 			updateNicks();
-			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade! </br> Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year (old movies too). </br> 5 points for correct answer, -3 for a wrong answer, highest points after 8 rounds wins!', nick: 'robot'});
+			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade! </br> Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year (old movies too). </br> 5 points for correct answer, -3 for a wrong answer, highest points after 8 rounds wins! </br>You can also type quit as an answer to quit if the game is going badly for you...', nick: 'robot'});
 			socket.emit('alert', {msg:"Welcome to the Arcade.", alert: 'alert-success'});
 			socket.join(spectators); //join spectator room
 			if(gameRunning === true){
@@ -297,6 +323,11 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 
 		}
 	});
+
+	socket.on('remove me', function(){ //does nothing right now.
+		removeMe(socket);
+	})
+		
 
 
 	//on disconnect=============================================================
