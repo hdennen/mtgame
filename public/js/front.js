@@ -95,7 +95,7 @@ function keepFading($obj) {
 		}else{
 			$chat.append('<b>'+ data.nick + ': </b>' + data.msg + "</br>");
 		}
-		
+		$chat.animate({ scrollTop: $chat[0].scrollHeight}, 1000);
 	});
 	//to do: do some check scroll magic on new message.
 
