@@ -55,3 +55,9 @@
 * scroll down on game start
 * Let newcomers know who’s playing
 * Add styling
+
+###v0.2.0
+* api at /api/scraper
+* quit game functionality
+* idle user auto disconnect after 5 minutes
+* modal notifier for disconnect
