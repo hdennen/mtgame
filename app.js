@@ -1,25 +1,64 @@
 //app.js
 
+//setup==============================
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var request = require('request');
+var cheerio = require('cheerio');
+//var mongoose = require('mongoose');
 var nicknames = []; //to do: set a limit on this.
 var game = new Game(); //maybe do: dynamically instantiate this for multiple simultanious games later
 var gameRunning = false;
 var gameBoard = 'gameBoard'; //use socket.io's rooms functionality
 var spectators = 'spectators'; //room for spectators, everyone auto joined.
 
-var topMoviesAPI = '';//store movies to reduce api calls (I only get 2000);
-var topMovies = ''; //UNCOMMENT FOR PRODUCTION+++++++++++
-getMovies(); //UNCOMMENT FOR PRODUCTION++++++++++
+//var topMoviesAPI = '';//OLD
+var topMovies = ''; //store what we scrape.
+scrapeMovies();
 
+//to do: finish top winning streak storage
+/*mongoose.connect('mongodb://myArcade:my@rcad3@waffle.modulusmongo.net:27017/awOmoj9i')
+var topStreaks = mongoose.model('tops', {
+    text : String
+});*/
 
 
 server.listen(3000);
-app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs... sorry angular.
-//getMovies(); //api call on app start. works fine, but for some reason can't use var filled from api call.
+app.use(express.static(__dirname + '/public')); //lemme not deal with individual GET reqs...
+//scraper api
+app.get('/api/scraper', function(req, res) {
+  res.send(topMovies);
+});
+
+
+//functions===============================
+function scrapeMovies(){
+  var url = 'http://www.imdb.com/chart/top';
+  console.log("Begin scraping.");//test++++++++++++++++++++++++++++++
+  request(url, function(error, response, body){
+    if(!error && response.statusCode == 200){
+      console.log("scraping complete.");//test++++++++++++++++++++++++++++++
+      var $ = cheerio.load(body);
+      var title = "";
+      var year = "";
+      var rank = 1;
+      topMovies = {"data":{"movies":[]}};
+      $('tbody.lister-list').filter(function(){
+        $('tr').each(function(){
+          var movieJSON = {};
+          movieJSON.title = $(this).children('td.titleColumn').children('a').text(); //some of these don't come back in english...
+          movieJSON.year = $(this).children('td.titleColumn').children('span').text().replace(/[()]/g, ''); //regex remove parenthesis.
+          if(movieJSON.title != ''){ //weird null at beginning and some at end, filter them out here.
+          	topMovies.data.movies.push(movieJSON);
+          }
+        });
+      });
+    } 
+  });
+}
+
 
 
 function Game(){ //game object
@@ -33,18 +72,18 @@ function Game(){ //game object
 	this.round = 0;
 	this.movies = [['','']];
 }
-
-function getMovies(){ //do once to reduce api calls
+//old method
+/*function getMovies(){ //do once to reduce api calls
 	console.log("calling API");
 	request.get('http://api.myapifilms.com/imdb/top?start=1&end=250&token=9cdf9b51-79af-4eeb-95ad-e50f3acaaf4e&format=json&data=0', function(error, response, body){
 		console.log("response received");
     if (!error && response.statusCode == 200) {
-        topMoviesAPI = body; //for some reason it doesn't like this... TO FIX
+        topMoviesAPI = body; //for some reason it doesn't like this... so we'll run it through a parser.
         console.log("returning movies");
         //return body;
     }
 	});
-}
+}*/
 
 function addPlayer1(socket){ //socket id and nickname
 	game.player1 = socket.nickname; //passed from socket.nickname
@@ -70,9 +109,9 @@ function genKeys(){ //8 random keys for movies
 		game.keys.push(Math.floor(Math.random() * (250)) + 1); //random number between 1 adn 250
 		console.log("generating movie key");
 	}
-	if(topMovies === ''){
+/*	if(topMovies === ''){
 		topMovies = JSON.parse(topMoviesAPI); //just making sure this gets done after api is called. to do: find a better way to do this.
-	}
+	}*/
 }
 
 function popMovies(keys, callback){ //populate movies based on keys on callback to make sure they're populated first.
