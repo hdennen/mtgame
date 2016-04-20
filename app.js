@@ -294,7 +294,8 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 				var diff = game.p1score - game.p2score;
 				io.sockets.emit('new message', {msg: game.player1+' won the last game by ' + diff +' points!', nick: 'robot'});
 				io.to(game.p2socket).emit('hide board');
-				io.to(game.p2socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
+				io.to(game.p1socket).emit('alert', {msg:"You won!", alert: 'alert-success'});
+				io.to(game.p2socket).emit('alert', {msg:"You lost, bye bye!", alert: 'alert-danger'});
 				//reset game
 				p2fullSock.leave(gameBoard);
 				p2fullSock.join(spectators);
@@ -303,7 +304,8 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 				var diff = game.p2score - game.p1score;
 				io.sockets.emit('new message', {msg: game.player2+' won the last game by ' + diff +' points!', nick: 'robot'});
 				io.to(game.p1socket).emit('hide board');
-				io.to(game.p1socket).emit('alert', {msg:"Bye Bye!", alert: 'alert-danger'});
+				io.to(game.p2socket).emit('alert', {msg:"You won!", alert: 'alert-success'});
+				io.to(game.p1socket).emit('alert', {msg:"You lost, bye bye!", alert: 'alert-danger'});
 				//reset game
 				p1fullSock.leave(gameBoard);
 				p1fullSock.join(spectators);
