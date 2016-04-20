@@ -150,7 +150,7 @@ function getSocket(socketID){
 
 function wrongAnswerHelp(data, socket){
 	var diff = Math.abs(data - game.movies[game.round][1]);
-	if(data === 'quit'){
+	if(data === 'quit' || data === 'Quit'){
 		removeMe(socket);
 	}else	if(data === ''){
 		socket.emit('game message', {msg:"Did you accidentally submit? Tough, you still lose points.", alert:"alert-danger"});
@@ -211,7 +211,7 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 			socket.nickname = data; //store each user with socket as property of socket.
 			nicknames.push(socket.nickname);
 			updateNicks();
-			socket.emit('new message', {msg: 'Hi '+socket.nickname+', welcome to the arcade! </br> Click join to join a trivia game. I will send movie titles from the IMDB top 250 list and you have to guess the year (old movies too). </br> 5 points for correct answer, -3 for a wrong answer, highest points after 8 rounds wins! </br>You can also type quit as an answer to quit if the game is going badly for you...', nick: 'robot'});
+			socket.emit('new message', {msg: "Hi "+socket.nickname+", welcome to the arcade! </br> Click the green 'join' button to join a trivia game. Once someone else joins, I will send movie titles from the IMDB top 250 list and you have to guess the year (old movies too). </br> You get 5 points for correct answer, -3 for a wrong answer, and highest points after 8 rounds wins! </br>You can also type 'quit' as an answer or in chat to leave the game.", nick: 'robot'});
 			socket.emit('alert', {msg:"Welcome to the Arcade.", alert: 'alert-success'});
 			socket.join(spectators); //join spectator room
 			if(gameRunning === true){
@@ -225,7 +225,15 @@ io.sockets.on('connection', function(socket){ //function with user's socket
 	}
 
 	socket.on('send message', function(data){ //put user message in group chat
-		io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+		if (data === 'quit' || data === 'Quit'){
+			if(socket.id === game.p1socket || socket.id === game.p2socket){ // nest this so we don't have to check full on each message.
+			removeMe(socket);
+			} else{
+				io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+			}
+		}else{
+			io.sockets.emit('new message', {msg: data, nick: socket.nickname});
+		}
 	});
 
 
