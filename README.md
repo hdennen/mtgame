@@ -1,6 +1,6 @@
-#Movie trivia game
+# Movie trivia game
 
-##Params
+## Params
 * 2 player, diff devices.
 * Each player see movie title from IMDB top 250 list
 * Asked to guess year released
@@ -12,16 +12,16 @@
 * Real-time
 * Rely on RESTful API that gets movie data from api
 
-##Change log
+## Change log
 
-###v0.1.2
+### v0.1.2
 * Make points + or – indicator old school style
 
-###v0.1.3
+### v0.1.3
 * Waiting for player to join functionality
 * Disable answer fields if one player
 
-###v0.1.4
+### v0.1.4
 * Welcome message
 * No line breaks in chatbox if no spaces
 * Don’t let nicknames have no values
@@ -30,7 +30,7 @@
 * Display round
 * Fix next movie animation (switches before animation)
 
-###v0.1.5
+### v0.1.5
 * Reset round on new game
 * Old round game board lingers for winner due to round
 * Fix reset game for winner on new player join
@@ -40,12 +40,12 @@
 * Client side reset for loser
 * Fix round 1 flashing
 
-###v0.1.6
+### v0.1.6
 * Fix API call for movies
 * Account for multiple notifications 
 * Tie functionality
 
-###v0.1.7
+### v0.1.7
 * Auto scroll chat on new message
 * Spectators function
 * Spectators view
@@ -56,7 +56,7 @@
 * Let newcomers know who’s playing
 * Add styling
 
-###v0.2.0
+### v0.2.0
 * api at /api/scraper
 * quit game functionality
 * idle user auto disconnect after 5 minutes
